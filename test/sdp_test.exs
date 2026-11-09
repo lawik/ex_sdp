@@ -156,6 +156,31 @@ defmodule ExSDPTest do
 
       assert {:error, {:invalid_line, "l=invalid line"}} = ExSDP.parse(input)
     end
+
+    test "returns an error instead of raising on malformed lines" do
+      header = "o=- 1 1 IN IP4 10.47.16.5\r\ns=-\r\nt=0 0\r\n"
+
+      # {sdp, expected reason, line reported with the error}
+      malformed = [
+        {"v=x\r\n" <> header, :invalid_version, "v=x"},
+        {"v=\r\n" <> header, :invalid_version, "v="},
+        {"v=0\r\no=- x 1 IN IP4 10.47.16.5\r\n", :string_nan, "o=- x 1 IN IP4 10.47.16.5"},
+        {"v=0\r\no=- 1 x IN IP4 10.47.16.5\r\n", :string_nan, "o=- 1 x IN IP4 10.47.16.5"},
+        {"v=0\r\n" <> header <> "r=abc 1d 0\r\n", {:invalid_unit, "abc"}, "r=abc 1d 0"},
+        {"v=0\r\n" <> header <> "r=1d 1d x\r\n", {:invalid_unit, "x"}, "r=1d 1d x"},
+        {"v=0\r\n" <> header <> "r=1 2 abc\r\n", {:invalid_offset, "abc"}, "r=1 2 abc"},
+        {"v=0\r\n" <> header <> "a=fmtp\r\n", :invalid_attribute, "a=fmtp"},
+        {"v=0\r\n" <> header <> "a=rtpmap\r\n", :invalid_attribute, "a=rtpmap"},
+        {"v=0\r\n" <> header <> "a=rtpmap:96 opus/48000/2\r\n", :only_audio_can_have_params,
+         "a=rtpmap:96 opus/48000/2"},
+        {"v=0\r\n" <> header <> "m=audio 0 RTP/AVP 96\r\na=rtpmap:96 opus/48000/x\r\n",
+         :string_nan, "m=audio 0 RTP/AVP 96"}
+      ]
+
+      for {sdp, reason, line} <- malformed do
+        assert {:error, {^reason, ^line}} = ExSDP.parse(sdp)
+      end
+    end
   end
 
   describe "Parser parse!/1" do

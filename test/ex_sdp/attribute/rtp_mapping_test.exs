@@ -40,6 +40,15 @@ defmodule ExSDP.Attribute.RTPMappingTest do
       assert {:error, :invalid_pt} = RTPMapping.parse("9t9 h264/90000", media_type: :video)
       assert {:error, :string_nan} = RTPMapping.parse("99 h264/r0000", media_type: :video)
     end
+
+    test "returns an error when channels count is not a number" do
+      assert {:error, :string_nan} = RTPMapping.parse("96 opus/48000/x", media_type: :audio)
+    end
+
+    test "parses session-level mapping without media type" do
+      assert {:ok, %RTPMapping{params: nil}} = RTPMapping.parse("96 opus/48000", [])
+      assert {:error, :only_audio_can_have_params} = RTPMapping.parse("96 opus/48000/2", [])
+    end
   end
 
   describe "RTP Mapping serializer" do

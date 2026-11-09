@@ -25,6 +25,11 @@ defmodule ExSDP.OriginTest do
              }
     end
 
+    test "returns an error if session id or session version is not a number" do
+      assert {:error, :string_nan} = Origin.parse("jdoe x 2890842807 IN IP4 10.47.16.5")
+      assert {:error, :string_nan} = Origin.parse("jdoe 2890844526 x IN IP4 10.47.16.5")
+    end
+
     test "returns an error if declaration is invalid" do
       assert {:error, :too_few_fields} = Origin.parse("jdoe 2890844526 2890842807")
     end

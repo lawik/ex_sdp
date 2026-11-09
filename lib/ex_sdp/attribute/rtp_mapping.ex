@@ -48,10 +48,10 @@ defmodule ExSDP.Attribute.RTPMapping do
     end
   end
 
-  defp parse_params([channels], media_type: :audio), do: {:ok, String.to_integer(channels)}
+  defp parse_params([channels], media_type: :audio), do: Utils.parse_numeric_string(channels)
   defp parse_params([], media_type: :audio), do: {:ok, 1}
-  defp parse_params([], media_type: _media_type), do: {:ok, nil}
-  defp parse_params(_params, media_type: _media_type), do: {:error, :only_audio_can_have_params}
+  defp parse_params([], _opts), do: {:ok, nil}
+  defp parse_params(_params, _opts), do: {:error, :only_audio_can_have_params}
 end
 
 defimpl String.Chars, for: ExSDP.Attribute.RTPMapping do

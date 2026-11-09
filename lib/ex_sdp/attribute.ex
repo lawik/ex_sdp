@@ -90,6 +90,29 @@ defmodule ExSDP.Attribute do
 
   @flag_attributes_strings @flag_attributes |> Enum.map(&to_string/1)
 
+  # known attributes that cannot be parsed without a value
+  @value_attributes [
+    "rtpmap",
+    "msid",
+    "fmtp",
+    "ssrc-group",
+    "ssrc",
+    "group",
+    "extmap",
+    "rtcp-fb",
+    "rid",
+    "simulcast",
+    "orient",
+    "type",
+    "framerate",
+    "ice-options",
+    "fingerprint",
+    "setup",
+    "maxptime",
+    "ptime",
+    "quality"
+  ]
+
   @doc """
   Parses SDP Attribute line.
 
@@ -104,6 +127,9 @@ defmodule ExSDP.Attribute do
     [attribute | value] = String.split(line, ":", parts: 2)
     do_parse(attribute, List.first(value), opts)
   end
+
+  defp do_parse(attribute, nil, _opts) when attribute in @value_attributes,
+    do: {:error, :invalid_attribute}
 
   defp do_parse("rtpmap", value, opts), do: RTPMapping.parse(value, opts)
   defp do_parse("msid", value, _opts), do: MSID.parse(value)

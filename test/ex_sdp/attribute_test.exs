@@ -32,6 +32,33 @@ defmodule ExSDP.AttributeTest do
       assert {:ok, "otherattr"} = Attribute.parse("otherattr")
     end
 
+    test "returns an error when a known attribute is missing its value" do
+      for attribute <- [
+            "rtpmap",
+            "msid",
+            "fmtp",
+            "ssrc-group",
+            "ssrc",
+            "group",
+            "extmap",
+            "rtcp-fb",
+            "rid",
+            "simulcast",
+            "orient",
+            "type",
+            "framerate",
+            "ice-options",
+            "fingerprint",
+            "setup",
+            "maxptime",
+            "ptime",
+            "quality"
+          ] do
+        assert {:error, :invalid_attribute} = Attribute.parse(attribute)
+        assert {:error, :invalid_attribute} = Attribute.parse(attribute, media_type: :audio)
+      end
+    end
+
     test "handles fingerprint with a hash-func token in any case" do
       value = "3B:1E:81:0E:64:41:BC:F5:A2:96:8C:A6:1F:11:26:2C:D5:B7:52:5C"
 

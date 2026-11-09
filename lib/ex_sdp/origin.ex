@@ -73,14 +73,16 @@ defmodule ExSDP.Origin do
 
   defp do_parse(username, sess_id, sess_version, nettype, addrtype, address) do
     with {:ok, addrtype} <- Address.parse_addrtype(addrtype),
-         {:ok, address} <- Address.parse_address(address) do
+         {:ok, address} <- Address.parse_address(address),
+         {:ok, sess_id} <- Utils.parse_numeric_string(sess_id),
+         {:ok, sess_version} <- Utils.parse_numeric_string(sess_version) do
       # check whether fqdn
       address = if is_binary(address), do: {addrtype, address}, else: address
 
       origin = %__MODULE__{
         username: username,
-        session_id: String.to_integer(sess_id),
-        session_version: String.to_integer(sess_version),
+        session_id: sess_id,
+        session_version: sess_version,
         network_type: nettype,
         address: address
       }

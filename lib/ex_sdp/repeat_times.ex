@@ -88,7 +88,7 @@ defmodule ExSDP.RepeatTimes do
   defp process_offsets([offset | rest], acc) do
     case Integer.parse(offset) do
       {offset, ""} when offset >= 0 -> process_offsets(rest, [offset | acc])
-      {__error, _reason} -> {:error, {:invalid_offset, offset}}
+      _invalid_offset -> {:error, {:invalid_offset, offset}}
     end
   end
 
@@ -113,6 +113,9 @@ defmodule ExSDP.RepeatTimes do
 
           {_error, invalid_unit} ->
             {:halt, {:error, {:invalid_unit, invalid_unit}}}
+
+          :error ->
+            {:halt, {:error, {:invalid_unit, elem}}}
         end
     end)
   end

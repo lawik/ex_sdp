@@ -14,6 +14,11 @@ defmodule ExSDP.RepeatTimesTest do
              } = result
     end
 
+    test "returns an error if compact format has a non-numeric value" do
+      assert {:error, {:invalid_unit, "abc"}} == RepeatTimes.parse("abc 1d 0")
+      assert {:error, {:invalid_unit, "x"}} == RepeatTimes.parse("1d 1d x")
+    end
+
     test "returns an error if compact format has illegal option" do
       assert {:error, {:invalid_unit, "g"}} = RepeatTimes.parse("6d 6h 10g 90m")
     end
@@ -44,6 +49,7 @@ defmodule ExSDP.RepeatTimesTest do
 
     test "return an error if offset is not valid" do
       assert {:error, {:invalid_offset, "64er"}} == RepeatTimes.parse("600 600 64er")
+      assert {:error, {:invalid_offset, "abc"}} == RepeatTimes.parse("600 600 abc")
     end
 
     test "returns an error if either duration or interval is not a number" do
